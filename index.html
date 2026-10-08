@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missing Letters Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700&family=Fredoka:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{--ink:#2d1e5f;--muted:#6b5b95;--pink:#ff5fa2;--orange:#ff9f1c;--yellow:#ffd93d;--green:#2ec27e;--blue:#3a86ff;--purple:#8e5cf7;--red:#ff4d6d}
+  *{box-sizing:border-box}
+  body{margin:0;font:17px/1.4 Fredoka,system-ui,sans-serif;color:var(--ink);min-height:100dvh;
+    background:linear-gradient(160deg,#7ee8fa,#b8f2c9 45%,#fff3b0) fixed}
+  .ar{font-family:Cairo,system-ui,sans-serif;direction:rtl}
+  h1{margin:0;font-size:clamp(1.8rem,6vh,2.8rem)} h2{margin:0 0 10px;font-size:1.25rem}
+  #app{min-height:100vh;min-height:100dvh;max-width:760px;margin:0 auto;padding:12px 14px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;text-align:center;gap:clamp(6px,1.6vh,14px)}
+  button{font:inherit;font-weight:600;font-size:1.05rem;border:0;border-radius:999px;padding:12px 22px;color:#fff;background:var(--green);
+    cursor:pointer;box-shadow:0 5px 0 rgba(0,0,0,.2)}
+  button:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,.2)}
+  .b-blue{background:var(--blue)}.b-orange{background:var(--orange)}.b-pink{background:var(--pink)}.b-purple{background:var(--purple)}.b-red{background:var(--red)}
+  .big{font-size:1.5rem;padding:16px 36px}
+  button:focus-visible,input:focus-visible,select:focus-visible{outline:4px solid var(--yellow);outline-offset:2px}
+  #gear{position:fixed;top:10px;left:10px;z-index:30;width:46px;height:46px;padding:0;border-radius:50%;background:var(--purple);font-size:1.3rem}
+  .top{width:100%;display:flex;justify-content:space-between;padding-left:54px}
+  .top b,.pill{background:var(--yellow);padding:2px 12px;border-radius:999px}
+  .bar{width:100%;height:10px;background:#fff9;border-radius:9px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--pink);transition:width .3s}
+  .pic{font-size:clamp(4rem,20vh,9rem);line-height:1.1;background:#fff;border:5px solid var(--yellow);border-radius:28px;padding:.05em .3em;
+    box-shadow:0 6px 0 rgba(0,0,0,.15);animation:bob 2.4s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-6px)}}
+  .meaning{font-size:clamp(1.5rem,5vh,2.6rem);color:var(--pink);font-weight:700;min-height:1.2em;line-height:1.2}
+  .word{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
+  .gap{width:14px}
+  .ch,.slot{width:clamp(30px,min(7vh,9vw),64px);height:clamp(42px,min(9vh,12vw),82px);border-radius:14px;display:grid;place-items:center;padding:0;
+    font:600 clamp(1.2rem,min(4.8vh,7vw),2.4rem) Fredoka,sans-serif;text-transform:lowercase;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+  .ch{color:#fff}
+  .ch:nth-child(5n+1){background:var(--blue)}.ch:nth-child(5n+2){background:var(--orange)}.ch:nth-child(5n+3){background:var(--purple)}
+  .ch:nth-child(5n+4){background:var(--pink)}.ch:nth-child(5n){background:#16a9c9}
+  .slot{background:#fff;color:var(--ink);border:4px dashed var(--purple)}
+  .slot:focus{border:4px solid var(--orange);transform:scale(1.1)}
+  .slot.hint{background:#fff3b0;border:4px solid var(--yellow)}
+  .slot.ok{background:#d7f9e6;border:4px solid var(--green)}
+  .slot.no{background:#ffe1e6;border:4px solid var(--red);color:var(--red)}
+  .fb{min-height:1.6em;font-weight:600;font-size:clamp(1rem,2.8vh,1.3rem)}
+  .fb.ok{color:#169a5f}.fb.no{color:var(--red)}
+  .bank{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-width:560px}
+  .bank:empty{display:none}
+  .bank button{width:clamp(38px,min(7vh,11vw),58px);height:clamp(38px,min(7vh,11vw),58px);padding:0;border-radius:14px;font-size:clamp(1.2rem,min(4vh,6vw),1.9rem);text-transform:lowercase;background:var(--blue)}
+  .bank button:nth-child(5n+2){background:var(--orange)}.bank button:nth-child(5n+3){background:var(--purple)}
+  .bank button:nth-child(5n+4){background:var(--pink)}.bank button:nth-child(5n){background:#16a9c9}
+  .bank button:disabled{opacity:.4;box-shadow:none}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  .hero{font-size:clamp(4rem,16vh,8rem)} .score{font-size:3rem;font-weight:700;color:var(--pink)}
+  .card{background:#fff;border:4px solid var(--purple);border-radius:24px;padding:16px;box-shadow:0 6px 0 rgba(0,0,0,.15);width:100%;text-align:left}
+  .card.c1{border-color:var(--pink)}.card.c2{border-color:var(--orange)}.card.c3{border-color:var(--green)}
+  .mist{list-style:none;margin:0;padding:0;max-height:32vh;overflow:auto}
+  .mist li{display:flex;gap:10px;align-items:center;padding:6px 8px;margin-bottom:6px;border-radius:12px;background:#fff1f3;font-size:1.2rem}
+  .mist .e{font-size:1.8rem} .mist u{color:var(--red);text-decoration:none;font-weight:700} .good{color:#169a5f}
+  .up{margin:0;padding:12px 16px;border-radius:999px;background:var(--blue);color:#fff;font-weight:600;cursor:pointer;white-space:nowrap;box-shadow:0 4px 0 rgba(0,0,0,.2)}
+  .pic.has{padding:0;overflow:hidden;width:200px;height:150px;max-width:100%;flex:none;display:grid;place-items:center;font-size:2rem}
+  :root{--fit:cover}
+  .pic img,.pic iframe{width:100%;height:100%;object-fit:var(--fit);background:#fff;border:0;display:block}
+  #imgPrev img,#imgPrev iframe{height:75px;width:100px;object-fit:cover;border-radius:10px;border:2px solid var(--yellow);vertical-align:middle;margin-right:8px;background:#fff}
+  #settings{position:fixed;inset:0;z-index:20;overflow:auto;padding:64px 14px 28px;background:linear-gradient(160deg,#7ee8fa,#b8f2c9 45%,#fff3b0)}
+  #settings[hidden]{display:none}
+  .wrap{max-width:620px;margin:0 auto;display:grid;gap:16px}
+  label{display:block;font-size:.9rem;color:var(--muted);margin:10px 0 4px}
+  input[type=text],select{width:100%;padding:12px 14px;border-radius:14px;border:3px solid #d9d2f5;background:#faf8ff;color:var(--ink);font:inherit}
+  .line{display:flex;gap:10px;align-items:center}
+  .chk{display:flex;gap:10px;align-items:center;margin:12px 0 0;font-size:1rem;color:var(--ink)} .chk input{width:22px;height:22px}
+  .hint-t{font-size:.85rem;color:var(--muted);margin-top:8px}
+  #list{list-style:none;margin:0;padding:0;max-height:260px;overflow:auto}
+  #list li{display:flex;align-items:center;gap:10px;padding:6px 8px;margin-bottom:6px;border-radius:14px;background:#f3f0ff}
+  #list .e{width:48px;height:36px;flex:none;border-radius:8px;overflow:hidden;background:#e9e4fb} #list .e img{width:100%;height:100%;object-fit:cover}
+  #list .eX{font-size:1.8rem} #list .t{flex:1;min-width:0} #list .t b{display:block}
+  #list button{padding:4px 10px;font-size:.95rem;box-shadow:none}
+  #toast{display:none;position:fixed;left:50%;bottom:20px;transform:translateX(-50%);max-width:90vw;background:var(--ink);color:#fff;padding:12px 20px;border-radius:999px;font-weight:600;z-index:100}
+  .pop{position:fixed;top:-40px;font-size:2rem;pointer-events:none;z-index:99;animation:fall 1.6s ease-in forwards}
+  @keyframes fall{to{transform:translateY(110vh) rotate(360deg)}}
+  @media(prefers-reduced-motion:reduce){.pic,.pop{animation:none}}
+</style>
+</head>
+<body>
+<button id="gear" aria-label="Settings">⚙️</button>
+<main id="app"></main>
+
+<section id="settings" hidden>
+ <div class="wrap">
+  <div class="card c1">
+    <h2>✏️ Add a word</h2>
+    <label for="en">English word</label>
+    <input id="en" type="text" placeholder="cat" autocomplete="off" autocapitalize="off">
+    <label for="ar">Arabic meaning <small>(optional: empty = translated for you)</small></label>
+    <input id="ar" class="ar" type="text" placeholder="قطة" autocomplete="off">
+    <label for="img">Picture link <small>(paste a link from any website, or add a photo)</small></label>
+    <div class="line"><input id="img" type="text" placeholder="Paste a picture link from any website" autocomplete="off"><label class="up" for="file">📷 Photo</label><input id="file" type="file" accept="image/*" hidden></div>
+    <div id="imgPrev" class="hint-t">You can also copy a picture and press Ctrl+V in the link box.</div>
+    <div class="row" style="margin-top:14px"><button id="addBtn" class="b-pink">Add word</button></div>
+    <div class="hint-t" id="status">Type just the English word and press Enter. The Arabic meaning is added automatically.</div>
+  </div>
+  <div class="card c2">
+    <h2>🎯 Quiz settings</h2>
+    <label for="mode">Letters to hide in each word</label>
+    <select id="mode"><option value="auto">Auto (by word length)</option><option value="1">1 letter</option><option value="2">2 letters</option><option value="3">3 letters</option><option value="random">Random</option></select>
+    <label for="count">Words in one quiz</label>
+    <select id="count"><option value="5">5</option><option value="10">10</option><option value="20">20</option><option value="all">All words</option></select>
+    <label for="choices">Letter choices to tap (extra wrong letters)</label>
+    <select id="choices"><option value="off">Off (type the letters)</option><option value="3">On, with 3 extra letters</option><option value="6">On, with 6 extra letters</option><option value="10">On, with 10 extra letters</option></select>
+    <label for="fit">Picture fit</label>
+    <select id="fit"><option value="cover">Fill the whole frame (crops the edges)</option><option value="contain">Show the whole picture</option></select>
+    <label class="chk"><input type="checkbox" id="showAr"> Show the Arabic meaning</label>
+    <label class="chk"><input type="checkbox" id="autoSay"> 🔊 Say the word after each answer</label>
+  </div>
+  <div class="card c3">
+    <h2>📚 Your words (<span id="count2">0</span>)</h2>
+    <ul id="list"></ul>
+    <div class="row" style="margin-top:10px"><button id="fixBtn" class="b-blue">🌍 Translate missing</button><button id="clearBtn" class="b-red">Delete all</button></div>
+  </div>
+  <div class="row"><button id="doneBtn" class="big">▶ Back to quiz</button></div>
+ </div>
+</section>
+<div id="toast" role="status"></div>
+
+<script>
+/* ===== Missing Letters Quiz: plain HTML/CSS/JS. Everything is saved in your browser (localStorage). ===== */
+const $ = id => document.getElementById(id), app = $("app");
+const esc = t => String(t).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmt = n => Number.isInteger(n) ? n : n.toFixed(1);
+let toastTimer; function toast(m){ const t=$("toast"); t.textContent=m; t.style.display="block"; clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.style.display="none",4000); }
+const setStatus = t => $("status").textContent = t;
+const shuffle = a => { for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; };
+
+/* ---------- built-in words: english,arabic (works offline; the third part is not used) ---------- */
+const DB = {};
+`cat,قطة,🐱 dog,كلب,🐶 bird,طائر,🐦 fish,سمكة,🐟 horse,حصان,🐴 cow,بقرة,🐮 sheep,خروف,🐑 goat,ماعز,🐐 lion,أسد,🦁 tiger,نمر,🐯 monkey,قرد,🐵
+elephant,فيل,🐘 rabbit,أرنب,🐰 duck,بطة,🦆 chicken,دجاجة,🐔 frog,ضفدع,🐸 snake,ثعبان,🐍 bear,دب,🐻 pig,خنزير,🐷 mouse,فأر,🐭 turtle,سلحفاة,🐢
+butterfly,فراشة,🦋 bee,نحلة,🐝 spider,عنكبوت,🕷️ apple,تفاحة,🍎 banana,موزة,🍌 orange,برتقالة,🍊 watermelon,بطيخة,🍉 grapes,عنب,🍇
+strawberry,فراولة,🍓 lemon,ليمونة,🍋 mango,مانجو,🥭 tomato,طماطم,🍅 potato,بطاطس,🥔 carrot,جزرة,🥕 onion,بصلة,🧅 corn,ذرة,🌽 pizza,بيتزا,🍕
+bread,خبز,🍞 milk,حليب,🥛 water,ماء,💧 egg,بيضة,🥚 cheese,جبن,🧀 rice,أرز,🍚 cake,كعكة,🍰 ice_cream,آيس_كريم,🍦 coffee,قهوة,☕ tea,شاي,🍵
+juice,عصير,🧃 book,كتاب,📖 pen,قلم,🖊️ pencil,قلم_رصاص,✏️ bag,حقيبة,🎒 school,مدرسة,🏫 teacher,معلم,🧑‍🏫 chair,كرسي,🪑 door,باب,🚪
+window,نافذة,🪟 house,منزل,🏠 bed,سرير,🛏️ key,مفتاح,🔑 clock,ساعة,🕒 phone,هاتف,📱 lamp,مصباح,💡 car,سيارة,🚗 bus,حافلة,🚌 bike,دراجة,🚲
+train,قطار,🚆 plane,طائرة,✈️ boat,قارب,⛵ sun,شمس,☀️ moon,قمر,🌙 star,نجمة,⭐ tree,شجرة,🌳 flower,زهرة,🌸 rain,مطر,🌧️ cloud,سحابة,☁️
+fire,نار,🔥 mountain,جبل,⛰️ sea,بحر,🌊 red,أحمر,🔴 blue,أزرق,🔵 green,أخضر,🟢 yellow,أصفر,🟡 black,أسود,⚫ white,أبيض,⚪ mother,أم,👩
+father,أب,👨 brother,أخ,👦 sister,أخت,👧 boy,ولد,👦 girl,بنت,👧 baby,طفل,👶 hand,يد,✋ eye,عين,👁️ ear,أذن,👂 nose,أنف,👃 mouth,فم,👄
+heart,قلب,❤️ ball,كرة,⚽ gift,هدية,🎁 smile,ابتسامة,😊
+wolf,ذئب,🐺 fox,ثعلب,🦊 deer,غزال,🦌 giraffe,زرافة,🦒 zebra,حمار_وحشي,🦓 camel,جمل,🐪 panda,باندا,🐼 dolphin,دلفين,🐬 whale,حوت,🐋 shark,قرش,🦈
+octopus,أخطبوط,🐙 crab,سلطعون,🦀 owl,بومة,🦉 eagle,نسر,🦅 penguin,بطريق,🐧 parrot,ببغاء,🦜 dinosaur,ديناصور,🦖 ant,نملة,🐜 snail,حلزون,🐌
+kangaroo,كنغر,🦘 crocodile,تمساح,🐊 pear,كمثرى,🍐 peach,خوخ,🍑 cherry,كرز,🍒 pineapple,أناناس,🍍 coconut,جوز_الهند,🥥 kiwi,كيوي,🥝
+cucumber,خيار,🥒 pepper,فلفل,🌶️ garlic,ثوم,🧄 mushroom,فطر,🍄 lettuce,خس,🥬 broccoli,بروكلي,🥦 eggplant,باذنجان,🍆 burger,برجر,🍔
+sandwich,ساندويتش,🥪 soup,شوربة,🍲 salad,سلطة,🥗 pasta,معكرونة,🍝 noodles,شعيرية,🍜 chocolate,شوكولاتة,🍫 candy,حلوى,🍬 cookie,بسكويت,🍪
+honey,عسل,🍯 butter,زبدة,🧈 salt,ملح,🧂 meat,لحم,🥩 fries,بطاطس_مقلية,🍟 donut,دونات,🍩 umbrella,مظلة,☂️ glasses,نظارة,👓 hat,قبعة,🎩
+shoe,حذاء,👟 shirt,قميص,👕 dress,فستان,👗 socks,جوارب,🧦 ring,خاتم,💍 crown,تاج,👑 camera,كاميرا,📷 computer,حاسوب,💻 television,تلفاز,📺
+radio,راديو,📻 scissors,مقص,✂️ hammer,مطرقة,🔨 knife,سكين,🔪 spoon,ملعقة,🥄 fork,شوكة,🍴 bottle,زجاجة,🍼 bell,جرس,🔔 flag,علم,🚩
+map,خريطة,🗺️ money,مال,💰 balloon,بالون,🎈 toy,لعبة,🧸 guitar,غيتار,🎸 piano,بيانو,🎹 drum,طبلة,🥁 soap,صابون,🧼 candle,شمعة,🕯️
+trophy,كأس,🏆 medal,ميدالية,🏅 letter,رسالة,✉️ newspaper,صحيفة,📰 ruler,مسطرة,📏 paper,ورقة,📄 music,موسيقى,🎵 game,لعبة_فيديو,🎮
+truck,شاحنة,🚚 ambulance,سيارة_إسعاف,🚑 helicopter,مروحية,🚁 rocket,صاروخ,🚀 ship,سفينة,🚢 taxi,سيارة_أجرة,🚕 tractor,جرار,🚜
+snow,ثلج,❄️ wind,رياح,💨 rainbow,قوس_قزح,🌈 lightning,برق,⚡ earth,الأرض,🌍 island,جزيرة,🏝️ volcano,بركان,🌋 desert,صحراء,🏜️ leaf,ورقة_شجر,🍃
+grass,عشب,🌱 rose,وردة,🌹 sunflower,عباد_الشمس,🌻 cactus,صبار,🌵 palm,نخلة,🌴 hospital,مستشفى,🏥 bank,بنك,🏦 mosque,مسجد,🕌 castle,قلعة,🏰
+doctor,طبيب,🧑‍⚕️ police,شرطي,👮 farmer,مزارع,🧑‍🌾 cook,طباخ,🧑‍🍳 pilot,طيار,🧑‍✈️ king,ملك,🤴 queen,ملكة,👸 man,رجل,🧔 woman,امرأة,👩
+friend,صديق,🤝 family,عائلة,👨‍👩‍👧 grandmother,جدة,👵 grandfather,جد,👴 leg,ساق,🦵 foot,قدم,🦶 tooth,سن,🦷 brain,دماغ,🧠 bone,عظم,🦴
+finger,إصبع,☝️ one,واحد,1️⃣ two,اثنان,2️⃣ three,ثلاثة,3️⃣ four,أربعة,4️⃣ five,خمسة,5️⃣ six,ستة,6️⃣ seven,سبعة,7️⃣ eight,ثمانية,8️⃣
+nine,تسعة,9️⃣ ten,عشرة,🔟 pink,وردي,🩷 purple,بنفسجي,🟣 brown,بني,🟤 happy,سعيد,😀 sad,حزين,😢 angry,غاضب,😠 cold,بارد,🥶`.trim().split(/\s+/).forEach(r => { const [k,a,e] = r.split(","); DB[k] = {ar:a.replace(/_/g," "), em:e}; });
+
+function entry(en, loose){                      // loose = also match plurals / the last word (for emoji only)
+  const k = en.trim().toLowerCase().replace(/\s+/g,"_");
+  const c = [k, k.replace(/ies$/,"y"), k.replace(/es$/,""), k.replace(/s$/,"")];
+  if(loose) c.push(k.split("_").pop());
+  for(const x of c) if(DB[x]) return DB[x];
+  return null;
+}
+
+/* ---------- automatic Arabic translation: built-in list -> Google -> Lingva -> MyMemory ---------- */
+async function getJSON(url){
+  const c = new AbortController(), t = setTimeout(() => c.abort(), 7000);
+  try{ const r = await fetch(url, {signal:c.signal}); if(!r.ok) throw new Error(r.status); return await r.json(); } finally{ clearTimeout(t); }
+}
+let trWhy = "", blockedNet = false;
+document.addEventListener("securitypolicyviolation", e => { if(/connect-src|default-src/.test(e.violatedDirective)) blockedNet = true; });
+async function translate(en){
+  const q = en.trim(), e = entry(q, false); trWhy = ""; if(e) return e.ar;
+  const tries = [
+    ["Google", async () => (await getJSON("https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=ar&dt=t&q=" + encodeURIComponent(q)))[0].map(x => x[0]).join("").trim()],
+    ["Lingva", async () => ((await getJSON("https://lingva.ml/api/v1/en/ar/" + encodeURIComponent(q))).translation || "").trim()],
+    ["MyMemory", async () => { const t = ((await getJSON("https://api.mymemory.translated.net/get?q=" + encodeURIComponent(q) + "&langpair=en|ar")).responseData || {}).translatedText || "";
+                  return /MYMEMORY|QUERY LENGTH|INVALID/i.test(t) ? "" : t.trim(); }]
+  ];
+  for(const [name, f] of tries){
+    try{ const t = await f(); if(t) return t; trWhy += name + ": no answer. "; }
+    catch(err){ trWhy += name + ": " + (err.name === "AbortError" ? "too slow" : "could not connect") + ". "; }
+  }
+  if(blockedNet) trWhy = "This window blocks internet access, so online translation cannot work here. Save the file and open it in Chrome, Edge, Firefox or Safari. ";
+  return "";
+}
+
+/* ---------- saved data ---------- */
+const SEED = ["cat","dog","apple","watermelon","banana","sun"].map(w => ({en:w, ar:DB[w].ar, img:""}));
+let words = (() => {
+  try{ const d = JSON.parse(localStorage.getItem("vocab-v2")); if(Array.isArray(d) && d.length) return d; }catch(e){}
+  try{ const o = JSON.parse(localStorage.getItem("vocab-game-words-v1"));            // older version: keep the words, use emoji
+       if(Array.isArray(o) && o.length) return o.map(w => ({en:w.en, ar:w.ar || "", img:w.img || ""})); }catch(e){}
+  return SEED;
+})();
+let S = {mode:"auto", count:"10", showAr:true, autoSay:true, fit:"cover", choices:"3"};
+try{ Object.assign(S, JSON.parse(localStorage.getItem("vocab-settings-v2")) || {}); }catch(e){}
+const saveWords = () => { try{ localStorage.setItem("vocab-v2", JSON.stringify(words)); }catch(e){} };
+const saveSet = () => { try{ localStorage.setItem("vocab-settings-v2", JSON.stringify(S)); }catch(e){} };
+
+/* ---------- sounds: a "whoosh" for a right answer, a soft "bonk" for a wrong one ---------- */
+let AC;
+/* sounds: "good" = happy chime + sparkles, "win" = big fanfare + whoosh + applause, "bad" = soft bonk */
+function sfx(kind){
+  try{
+    AC = AC || new (window.AudioContext || window.webkitAudioContext)(); if(AC.state === "suspended") AC.resume();
+    const t0 = AC.currentTime, out = AC.destination;
+    const tone = (f, at, dur, type = "sine", vol = .25) => {
+      const o = AC.createOscillator(), g = AC.createGain(); o.type = type; o.frequency.value = f;
+      g.gain.setValueAtTime(.0001, t0+at); g.gain.exponentialRampToValueAtTime(vol, t0+at+.02); g.gain.exponentialRampToValueAtTime(.0001, t0+at+dur);
+      o.connect(g); g.connect(out); o.start(t0+at); o.stop(t0+at+dur+.05);
+    };
+    const noise = (secs) => { const n = Math.floor(AC.sampleRate*secs), buf = AC.createBuffer(1, n, AC.sampleRate), d = buf.getChannelData(0);
+      for(let i=0;i<n;i++) d[i] = Math.random()*2 - 1; const s = AC.createBufferSource(); s.buffer = buf; return s; };
+    const sparkle = (at, n) => { for(let i=0;i<n;i++) tone(1800 + Math.random()*2600, at + i*.07, .14, "sine", .07); };   // twinkles
+    const whoosh = at => { const s = noise(.6), f = AC.createBiquadFilter(), g = AC.createGain(); f.type = "bandpass"; f.Q.value = 1.2;
+      f.frequency.setValueAtTime(250, t0+at); f.frequency.exponentialRampToValueAtTime(3500, t0+at+.45);
+      g.gain.setValueAtTime(.0001, t0+at); g.gain.exponentialRampToValueAtTime(.6, t0+at+.18); g.gain.exponentialRampToValueAtTime(.0001, t0+at+.55);
+      s.connect(f); f.connect(g); g.connect(out); s.start(t0+at); s.stop(t0+at+.6); };
+    const applause = (at, secs) => { const s = noise(secs), f = AC.createBiquadFilter(), g = AC.createGain(); f.type = "bandpass"; f.frequency.value = 2600; f.Q.value = .7;
+      g.gain.setValueAtTime(.0001, t0+at);
+      for(let t=0; t<secs; t+=.06) g.gain.linearRampToValueAtTime((.08 + Math.random()*.22) * (1 - t/secs), t0+at+t);
+      s.connect(f); f.connect(g); g.connect(out); s.start(t0+at); s.stop(t0+at+secs); };
+    if(kind === "good"){                         // happy "ding ding ding-ding!" going up
+      [523, 659, 784, 1047].forEach((f,i) => { tone(f, i*.09, .35, "triangle", .28); tone(f*2, i*.09, .25, "sine", .08); });
+      sparkle(.3, 6);
+    } else if(kind === "win"){                   // big celebration
+      whoosh(0);
+      [[523,0],[523,.14],[523,.28],[659,.42],[784,.62],[659,.82],[784,.96],[1047,1.16]].forEach(([f,at]) => { tone(f, at, .38, "triangle", .3); tone(f*2, at, .3, "sine", .08); });
+      [1047,1319,1568].forEach(f => tone(f, 1.16, 1.0, "triangle", .12));   // final shiny chord
+      sparkle(.5, 14); applause(.2, 1.8);
+    } else {                                     // soft wrong "bonk"
+      const o = AC.createOscillator(), g = AC.createGain(); o.type = "triangle";
+      o.frequency.setValueAtTime(240, t0); o.frequency.exponentialRampToValueAtTime(110, t0+.3);
+      g.gain.setValueAtTime(.4, t0); g.gain.exponentialRampToValueAtTime(.0001, t0+.35);
+      o.connect(g); g.connect(out); o.start(t0); o.stop(t0+.4);
+    }
+  }catch(e){}
+}
+function speak(text){
+  if(!("speechSynthesis" in window)){ toast("This browser cannot speak. Try Chrome, Edge or Safari."); return; }
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text); u.lang = "en-US"; u.rate = .85;
+  const v = speechSynthesis.getVoices().find(x => x.lang.replace("_","-").startsWith("en")); if(v) u.voice = v;
+  speechSynthesis.speak(u);
+}
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const e = ["🎉","⭐","🎈","🌟","🍭","🦄"];
+  for(let i=0;i<20;i++){ const d = document.createElement("div"); d.className = "pop"; d.textContent = e[i%e.length];
+    d.style.left = Math.random()*95 + "vw"; d.style.animationDelay = Math.random()*.5 + "s"; document.body.appendChild(d); setTimeout(() => d.remove(), 2400); }
+}
+
+/* ---------- which letters to hide ---------- */
+function pickBlanks(word, mode){
+  const idx = [...word].map((c,i) => /\p{L}/u.test(c) ? i : -1).filter(i => i >= 0), n = idx.length;
+  if(!n) return new Set();
+  let k = mode === "auto" ? Math.round(n*.4) : mode === "random" ? 1 + Math.floor(Math.random()*Math.max(1, Math.floor(n/2))) : parseInt(mode, 10);
+  k = Math.min(Math.max(k,1), Math.max(1, n-1));            // always leave one letter visible
+  return new Set(shuffle(idx).slice(0, k));
+}
+
+/* ===================== THE QUIZ ===================== */
+let Q = null, cur = null;                       // Q = whole quiz, cur = current question
+
+function showStart(){
+  Q = null; cur = null;
+  if(!words.length){ app.innerHTML = `<div class="hero">📝</div><h1>No words yet</h1><p>Press ⚙️ and add your first word.</p>`; return; }
+  const n = S.count === "all" ? words.length : Math.min(+S.count, words.length);
+  app.innerHTML = `<div class="hero">🔤🎈</div><h1>Missing Letters Quiz</h1>
+    <p>Fill in the missing letters.<br><span class="pill">${n} questions</span></p>
+    <button id="go" class="big b-pink">▶ Start quiz</button>`;
+  $("go").onclick = () => startQuiz(); $("go").focus();
+}
+
+function startQuiz(only){
+  const pool = shuffle((only || words).slice());
+  const n = only ? pool.length : S.count === "all" ? pool.length : Math.min(+S.count, pool.length);
+  Q = {list: pool.slice(0, n), i: 0, score: 0, mistakes: []};
+  showQ();
+}
+
+function showQ(){
+  const w = Q.list[Q.i], blanks = pickBlanks(w.en, S.mode);
+  cur = {w, slots: [], hints: 0, last: null, done: false};
+  app.innerHTML = `
+    <div class="top"><span>Question <b>${Q.i+1}/${Q.list.length}</b></span><span>Score <b id="sc">${fmt(Q.score)}</b></span></div>
+    <div class="bar"><i style="width:${Q.i / Q.list.length * 100}%"></i></div>
+    <div class="pic" id="pic"></div><div class="meaning ar" id="mean"></div>
+    <div class="word" id="word"></div><div class="fb" id="fb" aria-live="polite"></div><div class="bank" id="bank"></div>
+    <div class="row"><button id="say" class="b-orange">🔊 Listen</button><button id="hint" class="b-purple">💡 Hint</button><button id="chk">Check ✅</button></div>`;
+  const pic = $("pic"); pic.classList.add("has");           // the picture box is always 200 x 150
+  if(w.img){
+    pic.textContent = "⏳";
+    loadPic(w.img, im => {
+      if(!pic.isConnected || cur.w !== w) return;
+      if(im){ pic.textContent = ""; pic.appendChild(im); } else { pic.style.fontSize = "1rem"; pic.textContent = "Picture could not be loaded"; }
+    });
+  } else { pic.style.fontSize = "1rem"; pic.textContent = "No picture yet"; }
+  const m = $("mean");
+  if(!w.ar) translate(w.en).then(t => { if(t){ w.ar = t; saveWords(); if(cur && cur.w === w && m.firstChild && m.firstChild.nodeType === 3) m.textContent = t; } });
+  if(S.showAr || !w.ar){ m.textContent = w.ar || "🤔"; }
+  else { const b = document.createElement("button"); b.textContent = "👁️ Show meaning"; b.className = "b-blue"; b.onclick = () => m.textContent = w.ar; m.appendChild(b); }
+  const box = $("word");
+  [...w.en].forEach((c,i) => {
+    if(c === " "){ const g = document.createElement("div"); g.className = "gap"; box.appendChild(g); return; }
+    if(!blanks.has(i)){ const d = document.createElement("div"); d.className = "ch"; d.textContent = c; box.appendChild(d); return; }
+    const inp = document.createElement("input");
+    inp.className = "slot"; inp.maxLength = 1; inp.autocomplete = "off"; inp.setAttribute("autocapitalize","off");
+    inp.setAttribute("aria-label","Missing letter"); inp.dataset.a = c.toLowerCase(); inp.dataset.i = i;
+    inp.onfocus = () => cur.last = inp;
+    inp.oninput = () => { inp.value = inp.value.slice(-1); if(inp.value) move(inp, 1); };
+    inp.onkeydown = e => {
+      if(e.key === "Enter"){ e.preventDefault(); cur.done ? next() : check(); }
+      else if(e.key === "Backspace" && !inp.value) move(inp, -1);
+      else if(e.key === "ArrowLeft") move(inp, -1); else if(e.key === "ArrowRight") move(inp, 1);
+    };
+    if(S.choices !== "off") inp.inputMode = "none";                       // tablets: no keyboard pop-up, tap the letters instead
+    inp.onclick = () => { if(S.choices !== "off" && !cur.done && !inp.readOnly) inp.value = ""; };   // tap a filled box to empty it
+    box.appendChild(inp); cur.slots.push(inp);
+  });
+  if(S.choices !== "off"){                       // letter choices: the right letters + extra wrong ones
+    const need = [...new Set(cur.slots.map(x => x.dataset.a))];
+    const extra = shuffle("abcdefghijklmnopqrstuvwxyz".split("").filter(c => !need.includes(c))).slice(0, +S.choices);
+    shuffle(need.concat(extra)).forEach(ch => {
+      const b = document.createElement("button"); b.type = "button"; b.textContent = ch; b.setAttribute("aria-label", "Letter " + ch);
+      b.onmousedown = e => e.preventDefault();   // keep the cursor in the box
+      b.onclick = () => put(ch); $("bank").appendChild(b);
+    });
+  }
+  $("say").onclick = () => speak(w.en);
+  $("hint").onclick = hint;
+  $("chk").onclick = () => cur.done ? next() : check();
+  if(cur.slots[0]) cur.slots[0].focus();
+}
+function put(ch){                               // a tapped letter goes into the box you are on, or the first empty one
+  if(cur.done) return;
+  const ok = s => s && !s.readOnly;
+  let t = ok(cur.last) && !cur.last.value ? cur.last : cur.slots.find(s => !s.value);
+  if(!t) t = ok(cur.last) ? cur.last : cur.slots.find(s => !s.readOnly);
+  if(!t) return;
+  t.value = ch;
+  const n = cur.slots.find(s => !s.value); if(n) n.focus(); else $("chk").focus();
+}
+function move(from, dir){ const s = cur.slots, j = s.indexOf(from) + dir; if(s[j]) s[j].focus(); }
+function setFb(t, cls){ const f = $("fb"); f.className = "fb " + (cls || ""); f.textContent = t; }
+
+/* 💡 Hint: fills the letter you are waiting on (the box you are in, or the first empty box) */
+function hint(){
+  if(cur.done) return;
+  const wrongOrEmpty = s => s.value.toLowerCase() !== s.dataset.a;
+  let t = cur.last && !cur.last.readOnly && wrongOrEmpty(cur.last) ? cur.last : cur.slots.find(s => !s.value);
+  if(!t) t = cur.slots.find(s => !s.readOnly && wrongOrEmpty(s));
+  if(!t){ setFb("All letters are right so far. Press Check! ✅"); return; }
+  t.value = t.dataset.a; t.readOnly = true; t.classList.add("hint"); cur.hints++;
+  setFb("💡 Hint used: this word will give half a point.");
+  const nxt = cur.slots.find(s => !s.value); if(nxt) nxt.focus(); else $("chk").focus();
+}
+
+function check(){
+  if(cur.slots.some(s => !s.value)){ setFb("Fill in every blank first! ✍️", "no"); return; }
+  const w = cur.w, bad = [];
+  cur.slots.forEach(s => { if(s.value.toLowerCase() !== s.dataset.a) bad.push(s); });
+  const typed = [...w.en].map((c,i) => { const s = cur.slots.find(x => +x.dataset.i === i); return s ? s.value.toLowerCase() : c; }).join("");
+  cur.done = true; document.querySelectorAll("#bank button").forEach(b => b.disabled = true);
+  if(!bad.length){
+    const pts = cur.hints ? .5 : 1; Q.score += pts;
+    cur.slots.forEach(s => { s.classList.add("ok"); s.readOnly = true; });
+    sfx("good"); confetti();
+    setFb(cur.hints ? "Correct! 🎉 (+½ point, you used a hint)" : "Great job! 🎉⭐ +1", "ok");
+  } else {
+    Q.mistakes.push({w, typed});
+    const lines = bad.map(s => `“${s.value}” should be “${s.dataset.a}”`);
+    bad.forEach(s => { s.classList.remove("hint"); s.classList.add("no"); s.value = s.dataset.a; });   // show the right letter
+    cur.slots.forEach(s => { if(!bad.includes(s)) s.classList.add("ok"); s.readOnly = true; });
+    sfx("bad"); setFb("Oops! The word is “" + w.en + "”. " + lines.join(" · "), "no");
+  }
+  $("sc").textContent = fmt(Q.score);
+  if(S.autoSay) speak(w.en);
+  const last = Q.i === Q.list.length - 1, b = $("chk");
+  b.textContent = last ? "See my score 🏆" : "Next ➡️"; b.focus();
+}
+function next(){ Q.i++; Q.i >= Q.list.length ? showResults() : showQ(); }
+
+function showResults(){
+  const total = Q.list.length, p = Q.score / total;
+  const icon = p >= .9 ? "🏆" : p >= .6 ? "🌟" : p >= .3 ? "👍" : "💪";
+  const msg = p >= .9 ? "Amazing! You are a word champion!" : p >= .6 ? "Great work! Keep going!" : p >= .3 ? "Good try! Practice makes perfect." : "Don't give up! Try again, you can do it!";
+  const diff = (typed, right) => [...typed].map((c,i) => c === right[i] ? esc(c) : `<u>${esc(c)}</u>`).join("");
+  app.innerHTML = `<div class="hero">${icon}</div><h1>Quiz finished!</h1>
+    <div class="score">${fmt(Q.score)} / ${total}</div><p>${msg}</p>` +
+    (Q.mistakes.length ? `<div class="card" style="text-align:left"><h2>Let's learn from these</h2><ul class="mist">` +
+      Q.mistakes.map(m => `<li><span>${diff(m.typed, m.w.en)}</span> → <b class="good">${esc(m.w.en)}</b></li>`).join("") + `</ul></div>` : `<p>No mistakes! 🎉</p>`) +
+    `<div class="row"><button id="again" class="b-pink">🔄 Play again</button>` +
+    (Q.mistakes.length ? `<button id="fix" class="b-orange">🎯 Practice mistakes</button>` : "") + `</div>`;
+  const wrong = Q.mistakes.map(m => m.w);
+  $("again").onclick = () => startQuiz(); if($("fix")) $("fix").onclick = () => startQuiz(wrong);
+  if(p >= .6){ sfx("win"); confetti(); }
+}
+
+/* ===================== PICTURES FROM ANY WEBSITE =====================
+   Paste a picture link (or add / paste a photo). The app tries the link directly, then free image
+   helpers, and as a last resort shows the link itself in a frame, so almost any link displays. */
+let picData = "", picJob = null;
+const cleanLink = t => { t = (t || "").trim(); try{ const g = new URL(t).searchParams.get("imgurl"); if(g) return g; }catch(e){} return t; };  // understands Google "imgurl=" links
+const isPicSrc = t => /^(https?:\/\/|data:image\/)/i.test(t);
+function tryLoad(url, cors, ref = "no-referrer"){
+  return new Promise(res => {
+    const im = new Image(); let done = false; const end = v => { if(!done){ done = true; res(v); } };
+    if(cors) im.crossOrigin = "anonymous"; if(ref) im.referrerPolicy = ref;
+    im.onload = () => end(im); im.onerror = () => end(null); setTimeout(() => end(null), 12000); im.src = url;
+  });
+}
+const viaHelpers = u => { const e = encodeURIComponent(u); return [u, "https://wsrv.nl/?url=" + e + "&w=800", "https://images.weserv.nl/?url=" + e + "&w=800", "https://external-content.duckduckgo.com/iu/?u=" + e]; };
+function frameFor(url){
+  const f = document.createElement("iframe"); f.src = url; f.setAttribute("sandbox", ""); f.referrerPolicy = "no-referrer"; f.title = "picture"; return f;
+}
+function smallJpeg(im){                          // copy into a small JPEG (max 480 px) kept inside the app
+  const w = im.naturalWidth || im.width, h = im.naturalHeight || im.height, k = Math.min(1, 480 / Math.max(w, h));
+  const c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w*k)); c.height = Math.max(1, Math.round(h*k));
+  const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); g.drawImage(im, 0, 0, c.width, c.height);
+  return c.toDataURL("image/jpeg", .82);
+}
+async function fromLink(link){                   // -> {src, im, frame?} or null
+  link = cleanLink(link); if(!isPicSrc(link)) return null;
+  if(/^data:/i.test(link)){ const im = await tryLoad(link, false); return im ? {src: link, im} : null; }
+  const ways = viaHelpers(link);
+  for(const u of ways){ const im = await tryLoad(u, true); if(im){ try{ return {src: smallJpeg(im), im}; }catch(e){} } }   // 1) copy it into the app
+  for(const u of ways){ const im = await tryLoad(u, false) || await tryLoad(u, false, ""); if(im) return {src: link, im}; }     // 2) keep the link
+  return {src: link, im: frameFor(link), frame: true};                                                                            // 3) force it in a frame
+}
+async function fromFile(f){
+  if(!f || !f.type.startsWith("image/")) return null;
+  const u = URL.createObjectURL(f), im = await tryLoad(u, false); if(!im){ URL.revokeObjectURL(u); return null; }
+  try{ const src = smallJpeg(im); URL.revokeObjectURL(u); return {src, im: await tryLoad(src, false) || im}; }catch(e){ URL.revokeObjectURL(u); return null; }
+}
+function loadPic(src, cb){                       // for the quiz: show a saved picture, whatever it takes
+  (async () => {
+    if(/^https?:/i.test(src)){
+      for(const u of viaHelpers(src)){ const im = await tryLoad(u, false) || await tryLoad(u, false, ""); if(im){ cb(im); return; } }
+      cb(frameFor(src)); return;
+    }
+    cb(await tryLoad(src, false));
+  })();
+}
+function setPreview(r, msg){
+  const box = $("imgPrev"); box.textContent = "";
+  if(r){ box.append(r.im.cloneNode(), r.frame ? "⚠️ Showing the link directly. If it stays empty, use 📷 Photo or Ctrl+V." : "✅ Picture ready"); }
+  else box.textContent = msg || "You can also copy a picture and press Ctrl+V in the link box.";
+}
+function startJob(fn, empty){
+  const job = picJob = (async () => {
+    setPreview(null, "⏳ Loading the picture…"); picData = "";
+    const r = await fn(); if(job !== picJob) return;
+    if(r){ picData = r.src; setPreview(r); } else setPreview(null, empty);
+  })();
+}
+let linkTimer;
+$("img").oninput = () => {
+  clearTimeout(linkTimer); picData = ""; const v = cleanLink($("img").value);
+  if(!v){ picJob = null; setPreview(null); return; }
+  if(!isPicSrc(v)){ picJob = null; setPreview(null, "Paste a full link that starts with https://"); return; }
+  linkTimer = setTimeout(() => startJob(() => fromLink(v), "❌ Could not load this link. Use 📷 Photo, or copy the picture and press Ctrl+V here."), 500);
+};
+$("img").onpaste = e => {
+  const f = [...(e.clipboardData ? e.clipboardData.files : [])].find(x => x.type.startsWith("image/"));
+  if(f){ e.preventDefault(); $("img").value = ""; startJob(() => fromFile(f), "❌ That is not a picture."); }
+};
+$("file").onchange = e => { const f = e.target.files[0]; if(f){ $("img").value = ""; startJob(() => fromFile(f), "❌ That is not a picture."); } };
+
+/* ===================== SETTINGS ===================== */
+function openSettings(open){
+  $("settings").hidden = !open; $("gear").textContent = open ? "✖" : "⚙️"; $("gear").setAttribute("aria-label", open ? "Close settings" : "Settings");
+  if(open) renderList(); else if(!Q || !cur) showStart();
+}
+$("gear").onclick = () => openSettings($("settings").hidden);
+$("doneBtn").onclick = () => { openSettings(false); if(Q) return; showStart(); };
+
+/* fill the Arabic by itself while you type the English word (never overwrites what you typed) */
+let autoAr = "", typeTimer;
+async function autoFill(){
+  const en = $("en").value.trim(); if(!en) return;
+  if(!$("ar").value || $("ar").value === autoAr){
+    const t = await translate(en);
+    if($("en").value.trim() === en && t && (!$("ar").value || $("ar").value === autoAr)){ $("ar").value = autoAr = t; setStatus("Arabic filled in. You can change it."); }
+  }
+}
+$("en").oninput = () => { clearTimeout(typeTimer); typeTimer = setTimeout(autoFill, 600); };
+$("en").onblur = autoFill;
+$("en").onkeydown = e => { if(e.key === "Enter"){ e.preventDefault(); $("addBtn").click(); } };   // Enter adds the word
+
+for(const id of ["ar","img"]) $(id).addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); $("addBtn").click(); } });
+$("addBtn").onclick = async () => {
+  const en = $("en").value.trim(); if(!en){ toast("Please type the English word."); return; }
+  let ar = $("ar").value.trim();
+  if(picJob) await picJob;                       // wait until the picture has finished loading
+  const typed = cleanLink($("img").value), img = picData || (isPicSrc(typed) ? typed : "");
+  if(!ar){ setStatus("Translating…"); ar = await translate(en); }       // empty Arabic = automatic translation
+  const i = words.findIndex(w => w.en.toLowerCase() === en.toLowerCase()), rec = {en, ar: ar || (i>=0 ? words[i].ar : ""), img: img || (i>=0 ? words[i].img || "" : "")};
+  if(i >= 0) words[i] = rec; else words.push(rec);
+  saveWords(); renderList();
+  $("en").value = $("ar").value = $("img").value = ""; $("file").value = ""; picData = ""; picJob = null; setPreview(null); autoAr = ""; $("en").focus();
+  setStatus(!ar ? "Added, but translation failed. " + trWhy + "Type the Arabic yourself, or press “Translate missing” later." : "Added: " + en + " = " + rec.ar + (rec.img ? " 🖼️ ✔" : " ✔ (no picture yet: paste a link or add a photo)"));
+  Q = null;
+};
+
+function renderList(){
+  $("count2").textContent = words.length;
+  const ul = $("list"); ul.innerHTML = "";
+  words.forEach((w,i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `<span class="e"></span><div class="t"><b></b><span class="ar"></span></div><button class="b-blue spk" aria-label="Listen">🔊</button><button class="b-red del" aria-label="Delete">✕</button>`;
+    if(w.img){ const im = new Image(); im.referrerPolicy = "no-referrer"; im.src = w.img; im.alt = ""; li.querySelector(".e").appendChild(im); }
+    li.querySelector("b").textContent = w.en;
+    li.querySelector(".ar").textContent = w.ar || "(no Arabic yet)";
+    li.querySelector(".spk").onclick = () => speak(w.en);
+    li.querySelector(".del").onclick = () => { words.splice(i,1); saveWords(); renderList(); Q = null; };
+    ul.appendChild(li);
+  });
+}
+$("fixBtn").onclick = async () => {
+  const todo = words.filter(w => !w.ar);
+  if(!todo.length){ toast("Every word already has an Arabic meaning ✔"); return; }
+  for(const w of todo){ if(!w.ar) w.ar = await translate(w.en); }
+  saveWords(); renderList(); toast(words.some(w => !w.ar) ? "Could not translate some words. " + trWhy : "Done ✔");
+};
+let clearTimer;
+$("clearBtn").onclick = () => {                  // two taps, because pop-up questions are blocked in some viewers
+  const b = $("clearBtn");
+  if(b.dataset.sure){ clearTimeout(clearTimer); delete b.dataset.sure; b.textContent = "Delete all"; words = []; saveWords(); renderList(); Q = null; toast("All words deleted."); }
+  else { b.dataset.sure = "1"; b.textContent = "Tap again to confirm"; clearTimer = setTimeout(() => { delete b.dataset.sure; b.textContent = "Delete all"; }, 4000); }
+};
+
+/* quiz settings */
+document.documentElement.style.setProperty("--fit", S.fit);
+$("fit").value = S.fit;
+$("fit").onchange = () => { S.fit = $("fit").value; document.documentElement.style.setProperty("--fit", S.fit); saveSet(); };
+$("choices").value = S.choices;
+$("choices").onchange = () => { S.choices = $("choices").value; saveSet(); };
+$("mode").value = S.mode; $("count").value = S.count; $("showAr").checked = S.showAr; $("autoSay").checked = S.autoSay;
+$("mode").onchange = () => { S.mode = $("mode").value; saveSet(); };
+$("count").onchange = () => { S.count = $("count").value; saveSet(); };
+$("showAr").onchange = () => { S.showAr = $("showAr").checked; saveSet(); };
+$("autoSay").onchange = () => { S.autoSay = $("autoSay").checked; saveSet(); };
+
+/* start, then quietly fill in anything missing (Arabic) */
+showStart();
+(async () => {
+  let changed = false;
+  for(const w of words){
+    if(!w.ar){ const t = await translate(w.en); if(t){ w.ar = t; changed = true; } }
+  }
+  if(changed) saveWords();
+})();
+</script>
+</body>
+</html>
