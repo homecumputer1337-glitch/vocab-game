@@ -71,6 +71,7 @@
   .hint-t{font-size:.85rem;color:var(--muted);margin-top:8px}
   #list{list-style:none;margin:0;padding:0;max-height:260px;overflow:auto}
   #list li{display:flex;align-items:center;gap:10px;padding:6px 8px;margin-bottom:6px;border-radius:14px;background:#f3f0ff}
+  #list .sel{width:24px;height:24px;flex:none;accent-color:var(--purple)}
   #list .e{width:48px;height:36px;flex:none;border-radius:8px;overflow:hidden;background:#e9e4fb} #list .e img{width:100%;height:100%;object-fit:cover}
   #list .eX{font-size:1.8rem} #list .t{flex:1;min-width:0} #list .t b{display:block}
   #list button{padding:4px 10px;font-size:.95rem;box-shadow:none}
@@ -112,7 +113,9 @@
     <label class="chk"><input type="checkbox" id="autoSay"> 🔊 Say the word after each answer</label>
   </div>
   <div class="card c3">
-    <h2>📚 Your words (<span id="count2">0</span>)</h2>
+    <h2>📚 Your words <small id="count2"></small></h2>
+    <div class="row" style="margin-bottom:10px"><button id="selAll" class="b-blue">☑ Select all</button><button id="selNone" class="b-orange">☐ Select none</button></div>
+    <div class="hint-t" style="margin:0 0 8px">Tick the words you want in the quiz.</div>
     <ul id="list"></ul>
     <div class="row" style="margin-top:10px"><button id="fixBtn" class="b-blue">🌍 Translate missing</button><button id="clearBtn" class="b-red">Delete all</button></div>
   </div>
@@ -202,6 +205,7 @@ let words = (() => {
 })();
 let S = {mode:"auto", count:"10", showAr:true, autoSay:true, fit:"cover", choices:"3"};
 try{ Object.assign(S, JSON.parse(localStorage.getItem("vocab-settings-v2")) || {}); }catch(e){}
+const active = () => words.filter(w => w.on !== false);   // words ticked for the quiz
 const saveWords = () => { try{ localStorage.setItem("vocab-v2", JSON.stringify(words)); }catch(e){} };
 const saveSet = () => { try{ localStorage.setItem("vocab-settings-v2", JSON.stringify(S)); }catch(e){} };
 
@@ -273,7 +277,8 @@ let Q = null, cur = null;                       // Q = whole quiz, cur = current
 function showStart(){
   Q = null; cur = null;
   if(!words.length){ app.innerHTML = `<div class="hero">📝</div><h1>No words yet</h1><p>Press ⚙️ and add your first word.</p>`; return; }
-  const n = S.count === "all" ? words.length : Math.min(+S.count, words.length);
+  if(!active().length){ app.innerHTML = `<div class="hero">☑️</div><h1>No words ticked</h1><p>Press ⚙️ and tick the words you want in the quiz.</p>`; return; }
+  const n = S.count === "all" ? active().length : Math.min(+S.count, active().length);
   app.innerHTML = `<div class="hero">🔤🎈</div><h1>Missing Letters Quiz</h1>
     <p>Fill in the missing letters.<br><span class="pill">${n} questions</span></p>
     <button id="go" class="big b-pink">▶ Start quiz</button>`;
@@ -281,7 +286,7 @@ function showStart(){
 }
 
 function startQuiz(only){
-  const pool = shuffle((only || words).slice());
+  const pool = shuffle((only || active()).slice());
   const n = only ? pool.length : S.count === "all" ? pool.length : Math.min(+S.count, pool.length);
   Q = {list: pool.slice(0, n), i: 0, score: 0, mistakes: []};
   showQ();
@@ -503,7 +508,7 @@ $("addBtn").onclick = async () => {
   if(picJob) await picJob;                       // wait until the picture has finished loading
   const typed = cleanLink($("img").value), img = picData || (isPicSrc(typed) ? typed : "");
   if(!ar){ setStatus("Translating…"); ar = await translate(en); }       // empty Arabic = automatic translation
-  const i = words.findIndex(w => w.en.toLowerCase() === en.toLowerCase()), rec = {en, ar: ar || (i>=0 ? words[i].ar : ""), img: img || (i>=0 ? words[i].img || "" : "")};
+  const i = words.findIndex(w => w.en.toLowerCase() === en.toLowerCase()), rec = {en, ar: ar || (i>=0 ? words[i].ar : ""), img: img || (i>=0 ? words[i].img || "" : ""), on: i>=0 ? words[i].on !== false : true};
   if(i >= 0) words[i] = rec; else words.push(rec);
   saveWords(); renderList();
   $("en").value = $("ar").value = $("img").value = ""; $("file").value = ""; picData = ""; picJob = null; setPreview(null); autoAr = ""; $("en").focus();
@@ -512,12 +517,14 @@ $("addBtn").onclick = async () => {
 };
 
 function renderList(){
-  $("count2").textContent = words.length;
+  $("count2").textContent = "(" + active().length + " of " + words.length + " ticked)";
   const ul = $("list"); ul.innerHTML = "";
   words.forEach((w,i) => {
     const li = document.createElement("li");
-    li.innerHTML = `<span class="e"></span><div class="t"><b></b><span class="ar"></span></div><button class="b-blue spk" aria-label="Listen">🔊</button><button class="b-red del" aria-label="Delete">✕</button>`;
+    li.innerHTML = `<input type="checkbox" class="sel" aria-label="Include in quiz"><span class="e"></span><div class="t"><b></b><span class="ar"></span></div><button class="b-blue spk" aria-label="Listen">🔊</button><button class="b-red del" aria-label="Delete">✕</button>`;
     if(w.img){ const im = new Image(); im.referrerPolicy = "no-referrer"; im.src = w.img; im.alt = ""; li.querySelector(".e").appendChild(im); }
+    const cb = li.querySelector(".sel"); cb.checked = w.on !== false;
+    cb.onchange = () => { w.on = cb.checked; saveWords(); $("count2").textContent = "(" + active().length + " of " + words.length + " ticked)"; Q = null; };
     li.querySelector("b").textContent = w.en;
     li.querySelector(".ar").textContent = w.ar || "(no Arabic yet)";
     li.querySelector(".spk").onclick = () => speak(w.en);
@@ -525,6 +532,8 @@ function renderList(){
     ul.appendChild(li);
   });
 }
+$("selAll").onclick = () => { words.forEach(w => w.on = true); saveWords(); renderList(); Q = null; };
+$("selNone").onclick = () => { words.forEach(w => w.on = false); saveWords(); renderList(); Q = null; };
 $("fixBtn").onclick = async () => {
   const todo = words.filter(w => !w.ar);
   if(!todo.length){ toast("Every word already has an Arabic meaning ✔"); return; }
