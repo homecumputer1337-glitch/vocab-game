@@ -33,10 +33,9 @@
   .gap{width:14px}
   .ch,.slot{width:clamp(30px,min(7vh,9vw),64px);height:clamp(42px,min(9vh,12vw),82px);border-radius:14px;display:grid;place-items:center;padding:0;
     font:600 clamp(1.2rem,min(4.8vh,7vw),2.4rem) Fredoka,sans-serif;text-transform:lowercase;text-align:center;box-shadow:0 4px 0 rgba(0,0,0,.2)}
-  .ch{color:#fff}
-  .ch:nth-child(5n+1){background:var(--blue)}.ch:nth-child(5n+2){background:var(--orange)}.ch:nth-child(5n+3){background:var(--purple)}
-  .ch:nth-child(5n+4){background:var(--pink)}.ch:nth-child(5n){background:#16a9c9}
-  .slot{background:#fff;color:var(--ink);border:4px dashed var(--purple)}
+  :root{--word:#3a86ff}
+  .ch{color:#fff;background:var(--word)}
+  .slot{background:#fff;color:var(--word);border:4px dashed var(--word)}
   .slot:focus{border:4px solid var(--orange);transform:scale(1.1)}
   .slot.hint{background:#fff3b0;border:4px solid var(--yellow)}
   .slot.ok{background:#d7f9e6;border:4px solid var(--green)}
@@ -52,7 +51,7 @@
   .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
   .hero{font-size:clamp(4rem,16vh,8rem)} .score{font-size:3rem;font-weight:700;color:var(--pink)}
   .card{background:#fff;border:4px solid var(--purple);border-radius:24px;padding:16px;box-shadow:0 6px 0 rgba(0,0,0,.15);width:100%;text-align:left}
-  .card.c1{border-color:var(--pink)}.card.c2{border-color:var(--orange)}.card.c3{border-color:var(--green)}
+  .card.c1{border-color:var(--pink)}.card.c2{border-color:var(--orange)}.card.c3{border-color:var(--green)}.card.c4{border-color:var(--blue)}
   .mist{list-style:none;margin:0;padding:0;max-height:32vh;overflow:auto}
   .mist li{display:flex;gap:10px;align-items:center;padding:6px 8px;margin-bottom:6px;border-radius:12px;background:#fff1f3;font-size:1.2rem}
   .mist .e{font-size:1.8rem} .mist u{color:var(--red);text-decoration:none;font-weight:700} .good{color:#169a5f}
@@ -88,7 +87,7 @@
 <section id="settings" hidden>
  <div class="wrap">
   <div class="card c1">
-    <h2>✏️ Add a word</h2>
+    <h2 id="formTitle">✏️ Add a word</h2>
     <label for="en">English word</label>
     <input id="en" type="text" placeholder="cat" autocomplete="off" autocapitalize="off">
     <label for="ar">Arabic meaning <small>(optional: empty = translated for you)</small></label>
@@ -96,7 +95,8 @@
     <label for="img">Picture link <small>(paste a link from any website, or add a photo)</small></label>
     <div class="line"><input id="img" type="text" placeholder="Paste a picture link from any website" autocomplete="off"><label class="up" for="file">📷 Photo</label><input id="file" type="file" accept="image/*" hidden></div>
     <div id="imgPrev" class="hint-t">You can also copy a picture and press Ctrl+V in the link box.</div>
-    <div class="row" style="margin-top:14px"><button id="addBtn" class="b-pink">Add word</button></div>
+    <button id="rmPic" type="button" class="b-red" hidden style="margin-top:8px">🗑️ Remove picture</button>
+    <div class="row" style="margin-top:14px"><button id="addBtn" class="b-pink">Add word</button><button id="cancelEdit" class="b-orange" hidden>Cancel</button></div>
     <div class="hint-t" id="status">Type just the English word and press Enter. The Arabic meaning is added automatically.</div>
   </div>
   <div class="card c2">
@@ -109,15 +109,24 @@
     <select id="choices"><option value="off">Off (type the letters)</option><option value="3">On, with 3 extra letters</option><option value="6">On, with 6 extra letters</option><option value="10">On, with 10 extra letters</option></select>
     <label for="fit">Picture fit</label>
     <select id="fit"><option value="cover">Fill the whole frame (crops the edges)</option><option value="contain">Show the whole picture</option></select>
+  </div>
+  <div class="card c4">
+    <h2>🧰 Toolbox</h2>
+    <label class="chk"><input type="checkbox" id="tListen"> 🔊 Listen button</label>
+    <label class="chk"><input type="checkbox" id="tHint"> 💡 Hint button</label>
     <label class="chk"><input type="checkbox" id="showAr"> Show the Arabic meaning</label>
-    <label class="chk"><input type="checkbox" id="autoSay"> 🔊 Say the word after each answer</label>
+    <label class="chk"><input type="checkbox" id="autoSay"> Say the word after each answer</label>
+    <label for="rate">Voice speed</label>
+    <select id="rate"><option value="0.5">Very slow</option><option value="0.65">Slow (best for kids)</option><option value="0.85">Normal</option></select>
+    <label for="wcolor">Word colour</label>
+    <input type="color" id="wcolor" style="width:80px;height:44px;border:0;padding:0;background:none">
   </div>
   <div class="card c3">
     <h2>📚 Your words <small id="count2"></small></h2>
     <div class="row" style="margin-bottom:10px"><button id="selAll" class="b-blue">☑ Select all</button><button id="selNone" class="b-orange">☐ Select none</button></div>
     <div class="hint-t" style="margin:0 0 8px">Tick the words you want in the quiz.</div>
     <ul id="list"></ul>
-    <div class="row" style="margin-top:10px"><button id="fixBtn" class="b-blue">🌍 Translate missing</button><button id="clearBtn" class="b-red">Delete all</button></div>
+    <div class="row" style="margin-top:10px"><button id="fixBtn" class="b-blue">🌍 Translate missing</button><button id="resetBtn" class="b-purple">↺ Default words</button><button id="clearBtn" class="b-red">Delete all</button></div>
   </div>
   <div class="row"><button id="doneBtn" class="big">▶ Back to quiz</button></div>
  </div>
@@ -196,14 +205,18 @@ async function translate(en){
 }
 
 /* ---------- saved data ---------- */
-const SEED = ["cat","dog","apple","watermelon","banana","sun"].map(w => ({en:w, ar:DB[w].ar, img:"data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBwgHBgkIBwgKCgkLDRYPDQwMDRsUFRAWIB0iIiAdHx8kKDQsJCYxJx8fLT0tMTU3Ojo6Iys/RD84QzQ5OjcBCgoKDQwNGg8PGjclHyU3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3Nzc3N//AABEIAJQA7QMBIgACEQEDEQH/xAAcAAACAgMBAQAAAAAAAAAAAAAEBQMGAAECBwj/xAA7EAACAQMDAgUABwYGAgMAAAABAgMABBEFEiExQQYTIlFhFCMycYGRoUJyscHR8AcVM0NS4WLxFiSS/8QAGgEAAwEBAQEAAAAAAAAAAAAAAQIDBAAFBv/EACMRAAICAgMBAAIDAQAAAAAAAAABAhEDIQQSMSJBUTJhcUL/2gAMAwEAAhEDEQA/ALOzVsNgUN5nzXatXjQbkdZNvqKRqzNRv0NNOLoWwe4lwKV3MpOSOaNulJzQUS//AGEU8gms7UrpE2DozftZqeNsGrhLoOj7VjkaRZtvq8vkCluoeGngQy2MouYwMlcYYVqfHyRV+nOEkLI5eOTW2nGMZoNiycNx8VH5nPNTjmSdChO8k81IoJoZGyaLjPArXGpIB2ua4nUv0rZkCdajNwAfillhTBYrv7bnvSa5DR96f3dwjA80ivZFbOMms+bFBLQNgfnncMnird4d8NalqSLcMiwW5/3JTtyPiq3plsLi+FtEVduCxXnYPf769Hg3pbJAZCwAAAySfxNUw8JSXaRfHjtirxBojaNZRy+Yk+9sM8Zyq/GaSwXGepqzXUUskU9k7fVzodp9mHINUdZPKnK9VBxTzaxy14DLj6sd53LSyeLZL8GjLeYMvxWpE3nNNakyaRAsRkXAouGyMtu0MnfpXMAZDxRYuCjA4qk8MZR2UURVJoAI9XWpG8MRmAts5x7U9EnmKrfnRXm5i2r1qDUetIpBRKbY6LLDcHaPT3JqwNMtlbEhsYHSpSjqzFxxSu8tJb5jGuVU96RyUf8ASj14LbxU10tHAfLuRyFPRq607wlK8JN1lXz0FW/QtEtrGJSQrSY49zXeo6na282zeA2PUKbqo7kJ0XrOI2qYNQqN7UTHtxk1bBjSJyZJurl24qN3x0qCSTjrVZxVE7ZuVuKFiAN7D++P41qWbA60ILnZOjZ6EGsEl9DIvUUW+5lZu7VNOjLG4RiDjjihhIizlixIPYfdW52BQkL+tejCVM3uNo811TUZtI1RoL8b7WQ+mTvF/UUS7qyq8bK6uMhl6EfFNPElhDf27oEJfHZwf0rzu1v5tDv2tJ1c2xPIP7J9xWfk8RTXaHpmnj/Rdrd8EZplHKoAzSS3uoZVykgO7FMYzGVJaUAV3Hx5PyiDVEtzMgFJru75OCK3fXUUcjIz8qcHvQBlgdjucflWiWGbO6kE907ZFAPLMzFYh9YR1I4Ue9GXc8McZKkfBoXwwVutRaW5OQjBgMZ55xxUIcWXe5spHH+S7eDtHex0/wA5rTEknqLdPz704muktx9bcRR5PAVsk/nS3/NbaTENu7nB/Z4GfmttZySLvWcq3swB/hW+S0WitjTzhI0bhsgEVRNWKpqdwoUD6xsVbrEAMsbfbB7cCqj4lkCa3dqihQX9q8vlw+UDkLSNQXG0YzRkVyO9IhLiiI58d6xwnKDsypjb6aqMakTUIScNVfupMjOTS+SVw55P51rjybXg6kX+G5jkiIjbn2rdleLLIVLYdeOaotnfTWsquSSueRntVjuTvCTxHAfuPeoPN0yfXjCmWGbUEQFHGD2+aUS6sLZm/wCPXIoZWNz6Jchh0NQXNsyeljkdjQycuE5pDKdIK1DxNNLZgWiEjoW9qXxX8nlK12vmuRwWHIFQ/wCnnao6YPsaEuJ8lQOMDpVJ4HkS2Tc2egxEVIXx0NSCFRUUwCg1qjJoo4oiklx3oSaf5rczZ4FDldwORSSyWJ1Bbi5PPNBG4Oc4zRtxAMcUGYSO1TktBo9AspjNo9rc7xuMYDHHtXUl+iREum4DvQHhsyXWjS2jA+hjz2Aqua689rMQlxIUBxx0H41vxpOKZsjO40MNV1mybcUST/8AOKoPiV47wFol+uXlSO/waJ1HULwZ27iOpyQc/lVU1G8e5fPAI54yMVSxJE9vqbW0JjjLdQVp1ZapJLEi5O8kfn7VXZE+lIJgPrfssPdsZ/Xr99E+H5We+jjU56FeOrBlP64I/GnTaJ6H97JL9U21iZ4wy8/gf4UBcXLxpz1YA8dv7xV6n01bi3gnlTasSGNcjpkr/Sq54g0xksFSML5pTzGbpxvJzj7s0zsFlOlvpTuy2Ru4FEaTd3AmEUYLmTovY/8AVLoo3lYIgJZuOBRt1iyQ20DkzMPrpFP4hR7D396RhRZLfU7hTthnAx9phgD8Kb2NyWkWR5GdxwOTj8jVItZFjVfNxnqB3FXDSIvLjRmGWbkfAqbs0Qou+kI0oM2Ps1RvFTMNdugQQQ1XTw7FL9KLFjsxwKq3j+Ex69IRnDKD0+KhyY/CZnzle8ypI5T05qK1iM0oUkD76arZCMZR42+Aea85ozUDAbh6qHeP1E0xDxg7XGG+a4lgifoRUlPq6YQEIp6080gmaBoXbgdKSywshPl+qneixRiNry9YpApwF7yN7ChlXaJxOp2sBu5BohmDjY/fvUd9decqvbxLHH7AZP40Jaaid3lzAEZ4NY3BvaAamjMT4Yek9DQs1oHfOKbyqkuUJwccZoMhovSwPFasHJcVTOL86AUHcDrR7ChZUya9CctF2KpV5qHBFMXiyageHArO5M4E8ssa5a2+KPSLArpk+KPY5gU/iD/4/ZKCm+O4yrHOCPuqs3MouA8sT+YhORluRT7xJpw1HRbi3WNjMv1kXODx2rzG21Ke3jeCNFUkkE8kgj769LjSvHRSDpB2qvLu3JEdwOdwH980qmm34+kwt+90I/H+tTzrdTxeZKzk/v5yPit6bZ3ksyld6qeVJPB/A9a0pHSZ3pdsY7gCQFraXCl/Y54z7HJ/U8nirn4Z0J28RJPDAWji5C7cHdn9McijvD3h12VJEhRsj1Kp9Lj2weh9v15r1Pw3o8Vjb73X61+Scc09UTFt7oTtZIONzSKzAfBz/WlfiLw7nTgdm9toDY64BJFegsoIAI4qKZEIO7B++j2BR84SaIumRvJ5JMhPQ9CT2+Pn4BpNPbbJds26WfP+igwPvY9f7654r3TVPDgurp5o2OCWORjI4xx81R9Z8PTxXDbYlt7WNedmfWfk/wAz/wCx1DZQ7ddQ89AIjDGvZBsBH3jmrrpEk7whyJFTPBY8tSaLw8wBl2K+eVVc4+8+/b9fasia/wBJmWV5iCB9jOQfyodR4yo9O0pikSSbSKpnjG+iu9Yk2tuVQFJx3FWrwzqD6pZNuG2VRnAXFee6vHJBfTLIpVixJ755rFy0+tCTlbNRrCw4Irr6IgO5GIPvmkk0hEnpJB9hRFvLNg7WNZIYZLYv4G/kNIuyV8/8W7ilt39IhzwcD2rf+YyR/awcURbzSajE3kwSu4P7Kkg/jU2p9ra0Tfosj1CRW2yDPtT+7vUlmW2XhLdQijHfHJoX/JL2Ub/ojD5bAqW4sJzdO4jCljnburp9P8DQxs26qGwCK5uLX15Kg47jist0MaDFqxbuWY/yosyqYfrIipHBArFHqp78OIrcJKnlFmDdialRmxtcBtvGc0FLJ5cqqh5zwaKHl3BJk4cdeaObGr+fydRfCQQeRUDqK6HSuc5rR2ssyFgM8CtbM1LithaRy2KQ+XXDrRBFQv1p7OsG/wByqRc6OsGuXGxAQW3bQw6VeW4qKTSEnvo55EDb+N3tW/hP6odPRUZtBDWxeJHU5zsfop+Ke+EtAPmhZSdpOWDqGBP5/wAqu0fhW3mtdkcro2Rkg8Uv8VeH20rw9cTWNzOswGTIjbcDueOa9PSF9LHZ2mnacqgGGJj0XdgE/Ao+O4CnCcqehr571KS3NqVawinunZV+lFzvUZ65Oc96vv8AhnrM7rJpl08svk4aJn59Ptn3FI5bGUT1HdkUDqFyYjtHWjYnAjHGKR6jMPNkc9FBogArvxFpuiANql0sZkPojPqYn4A5NBTeLvDeqR+SLqJHP2BPGY8n43AZrzK81K8HiW61KQFJyCsQZQQIz7A0p0+3utT1Ly5UDyzSHGxSoyT1Aod6C4nrVlpUd3KXQLsXo4Ocj4/6qPUfDNvISwBBx26k1Z7e2Szso0UBSEGaDnfaCxORT2I9CvwpoJtrh0Ridw9ee1Nb3wNaXLNLIm5yOTR/hzHmSSH9qrKpBHFI0n6d6eK65/htM02+1GF9sUEngi7t09an8q93KK32sflQ09rFIMEfpSuEWdR4c2jQafzDarNcd5Zkyqfur3PyagS0vZpw09zMQP2d5UfkOK9T1fRUKswUD24qh6nvtbjZ059qy54OHiOpBdnpka27EL6xzyapniCT6PeKgA6e9XmJ9sccAcLM2NzE8DPQVS9SgNzqsqSjDIdp+KzTfz9B66FsF5KJAYjIKstlci8hw+C4+0uOTUljosbwhsDgUuuYHsL0PEeB1FQ5PFTx9kTaJp4o2PpYLg/Zao5rOWVwyLxgdKnvFWeFZ4zgHrW4HkEShXPFeepyS0BOi47uK4DYbBqQLmo5BzV52kVOt1dF+Khrl24qals47MgrTUNu5qTeTgKCSe1V7AaOXp5pTRT26xEAMDkZpR5I6ysF+B1qe3ljidQvAzzjvVsGRwmmci5WbkLt9qnuAlzC0LruVhgihbF18kMpzkVIJsP1/KveUrVhKfJ/hjYS3ZkjuLuCInPlqVIHwMqSBVisfDVho8UcVjCEGfUxyWY+5NPLecyHbmu7gAofjnNchrBZFITAIHzSu5t1GY3PqYEg+9dSXykcOMHtmlN9qsS39srSrhm2DnjnoK7sN1dWHT+HNMvrZY76zilIHBYdPx60NY+GtN0aRprK0ijbGDISWbH4808EqjaAp6VXdY1GeKZowHAov9iWya4vCGIEeR/zPU0K0xlGOPxpJJfvIdr5I984oqykZmHJPvmlUhWWfSj5aADg08hn+ardo3AwaYRzYHJqlC2PFkyKzfQEEu4daJDUBji8G+PFUnW9IU3CzNy2fSPc1eeCDmk0eL6/u5sfVQfURj3bqx/UD8KSdUo/sVnj2vyXkMjx8jJyWrlJfpkC3eSZogFmH/Idmq4+MdI8zc6IBVHtWksr4ELleQyn9odxXn8rE0wlg0+/CxFcjGKT61dq7kL1JqO/ie0mEkBJtphlG/iv4ULPEzqsmM1leZ9erOrQdpc4YmBzww4z70QqNDlADjtS6ynit3Duu4jp8U6a59KOBlWHFefljT/oSi0Rvx6q03JzXJ610FwKZNrTKpnFcOOK6Jwa0TxU1thtAxHqrtSfspwT1NYftVmCzgDiqrYCeK1J/b5rr6NIpB9O0HlieBUkJKDLckdqyR3uvtnCL19hTpJnWOdIuY8+UXLHH7IpjcwyqN6xkrSLSCiSjyxkf3/fNXJTvgAYDpXt8WTcNnAthIqIScBiOhapHuozGQ20Bhg+sUHdW+zLxEBvc1XNUubqHO0L07L3rTdI5CXWhLol08u8T2yg/R8H1Rg9j7ihdLi/zTUYtS1SXbHEQ1vb9MEftNUN9Df6lnzGWMcgjvihCLqzUeXPGzKuPV/CoXuzQ5/NHpD6jGsOQ8ROOu05pLqt+k5UCULIB3QjI/v4qrnUbiNR5krBvYNWvpzXHplG9fdv407y2QoP8ydmwGD++MOP5EflTGwIJGY1B90JH6UutYiWGGLe3uKd2qjC5wSO9GAGM7bipmmGaGRmH2RWwuSM1YQa20pHGeRRqy8UqhO2VR/yX9R/7otWxXIJPe3aWtpNcN/tpu+89qh0mI2+mQRvy5G9z/5Hk/xpbrMnnyWlkv8AvShn/cXk/rimZl44qa3kb/QALWYBLG4IzmvK9Wj+j3h9OOa9ZuG3oa888W2qo7SfNHPBTgAVW8qMjQzL9U3cfsn3riWPyswuB04x3HvQ1o+c55x70dxcQ7FPqXmP+leFlVaDYjmj8uQntTLTL2JoSknBQ8Zoe/jJjD4x91BpA7jcvSoOKnGmD09PSPHqrmQqTgms+kKkXq4zQnmksaOdJUkPEKwmK2yrt6GhmkbbwcVLEJJUwDmsi7J+DOgMg7jtqeH0YJ+12+K5WMpIVYEH5qQr37VbGmo7ASIM/Zrj/VkA6RL0/mTWg+AcV3kJHt6seT91PBOwML064L3QVTiPPJ96ucMqmEbW6VQoSLcBx1PP5VYNGvvOQBzye1erw5/8sI3cbqU6pbblJwabDg81xcRbxyK9Fo4oOpQFWOEpFOroFCrg1fNSs1OcCkNxYZbgVmlEdFWmjckk8jFEWURYggHg06/y7PBHFSQWCxHgUqQSaygwoAHHam0EWMe1CW67ABRakHua0QEYSB7V0qnI4qFTjqanRs9KqiZ1ISksB/8APb+YonPOM96DvCwtmYfaTDj8OanklVImlyNoUtn9aW6uwgdmxudcupz9i3QQr955b+VMy1J9CJXT1mf/AFLhjK2fk0weZERmLdBmkxahb/IDqRqrniO1Etuxp20wIHPNJtUcyoyjODVLAygJtglYEjrRdrtkJ5xzmhtVtmhkLY6mu9MVpT8Yrx+TD6O9DJgs+Vxt3HDd8N/31oGaRLF/KI5HWj1LRgi4XCHK7xXF5ZidkfKsxXkivOUql9AssEjkttz0rhmIHFcFt7kipkjynNcpdmOR+YSOtEW9y8GGUA/FAurb8DpUsZK8NWaU5KRw3WVLtckYauJFKDaetK/NaNwUNM4p0uIcMcSCvQx1Nf2D0jRMsQemahmchs/dRDnC5+KGl9R4qUXQ1HTPn0/hTPRZFin2/d1pQ3ByaJs3+uBzjmrQy9Z6CXkHcARXUsmBio7Ehrcd+KhnyM170JXGzga8YFsUBLGD2FEy5LZNQuMg0rGTBCFBwRWtqe1Yy+o881oAlN3akCckbea2sgH9KjMq8gmot2enWimKw9ZAw64+KIhYDqaWRl8jb+tEoS3wR1FVjIRjEEMMdfikurztDozQ59bMIB+Jx/CmUB9Q55pbq8Xn61aW68r/AK7feOB/Kkzv5pfnQGMYU2RIOcBQAPiuLwr5GMcuwX86mJxwaBun3XlvEOxLmnkqjRwTOqgDFItQnaPOG6e9OZZd44FJdTj3RsSpzQktAZXb+cTKQR0pfYylZQiZ3Z4GK3qBaKUgHIqO2uQjBj9odD3rFl+tCXQ6vWe5uPo6Rb0UBRt6/NSpD5ShROoI6gc0uF6DF5akhO4BxmoRf+WNqsAB2rBnwxSsCkWKEYejV4Q1usrz4fyZciCjOKil+3WVlNm8Rz8IWHqFFQ+lgRWVlUjqOhYhMp6jtihYTnr71uso/kJqZjiu7QkyKfmtVldi3kCi86ST5YHxUt0ADWVlfQ4v4BAJgB0qCbheKyspmFCS+kZWBBwaX/S5hLs3emsrKi2El3lnGaKjHOaysoo4KiqSb7AbuOlZWVZCMkQetD3/AOqD+14gdz1XYg+7aTWVlJP2P+isPkPrP30tLE6hcE9VQAVlZVZ+o42zseM1HeDdFg9BzWVlI/GcU/UQCs8p5KcAHpSFiS2fet1lYsumTZ2HbHWh5Cd3WsrKzzEP/9k="}));
+/* default words (add their pictures with the link box or 📷 Photo) */
+const SEED = [{en:"grow", ar:"ينمو", img:""}, {en:"park", ar:"حديقة", img:""}, {en:"tree", ar:"شجرة", img:""}];
 let words = (() => {
-  try{ const d = JSON.parse(localStorage.getItem("vocab-v2")); if(Array.isArray(d) && d.length) return d; }catch(e){}
+  try{ const d = JSON.parse(localStorage.getItem("vocab-v2"));
+       if(Array.isArray(d) && d.length){
+         if(d.map(w => w.en).join() === "cat,dog,apple,watermelon,banana,sun" && d.every(w => !w.img)) return SEED.map(w => ({...w}));   // old untouched defaults -> new defaults
+         return d; } }catch(e){}
   try{ const o = JSON.parse(localStorage.getItem("vocab-game-words-v1"));            // older version: keep the words, use emoji
        if(Array.isArray(o) && o.length) return o.map(w => ({en:w.en, ar:w.ar || "", img:w.img || ""})); }catch(e){}
   return SEED;
 })();
-let S = {mode:"auto", count:"10", showAr:true, autoSay:true, fit:"cover", choices:"3"};
+let S = {mode:"auto", count:"10", showAr:true, autoSay:true, fit:"cover", choices:"3", listen:true, hint:true, rate:"0.65", wcolor:"#3a86ff"};
 try{ Object.assign(S, JSON.parse(localStorage.getItem("vocab-settings-v2")) || {}); }catch(e){}
 const active = () => words.filter(w => w.on !== false);   // words ticked for the quiz
 const saveWords = () => { try{ localStorage.setItem("vocab-v2", JSON.stringify(words)); }catch(e){} };
@@ -248,11 +261,25 @@ function sfx(kind){
     }
   }catch(e){}
 }
+let voices = [];
+if("speechSynthesis" in window){ voices = speechSynthesis.getVoices(); speechSynthesis.onvoiceschanged = () => { voices = speechSynthesis.getVoices(); }; }
+function bestVoice(){                            // pick the clearest, most natural English voice on this device
+  const score = v => { const n = v.name; let k = 0;
+    if(/en[-_]US/i.test(v.lang)) k += 3; else if(/en[-_](GB|AU|CA)/i.test(v.lang)) k += 1;
+    if(/natural|neural|online/i.test(n)) k += 6;
+    if(/Google US English|Google UK English Female/i.test(n)) k += 5;
+    if(/Samantha|Ava|Allison|Aria|Jenny|Joanna|Karen|Zira|Siri|Nicky|Susan/i.test(n)) k += 4;
+    if(/female|woman/i.test(n)) k += 1;
+    if(/Fred|Albert|Bad News|Bahh|Bells|Boing|Bubbles|Cellos|Deranged|Good News|Hysterical|Junior|Organ|Pipe|Trinoids|Whisper|Zarvox|Eddy|Flo|Grandma|Grandpa|Reed|Rocko|Sandy|Shelley/i.test(n)) k -= 8;   // novelty voices
+    return k; };
+  return voices.filter(v => /^en[-_]/i.test(v.lang)).sort((a, b) => score(b) - score(a))[0] || null;
+}
 function speak(text){
   if(!("speechSynthesis" in window)){ toast("This browser cannot speak. Try Chrome, Edge or Safari."); return; }
   speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text); u.lang = "en-US"; u.rate = .85;
-  const v = speechSynthesis.getVoices().find(x => x.lang.replace("_","-").startsWith("en")); if(v) u.voice = v;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = "en-US"; u.rate = +S.rate || .65; u.pitch = 1.05; u.volume = 1;      // slow and a little brighter, for children learning English
+  const v = bestVoice(); if(v){ u.voice = v; u.lang = v.lang; }
   speechSynthesis.speak(u);
 }
 function confetti(){
@@ -300,7 +327,7 @@ function showQ(){
     <div class="bar"><i style="width:${Q.i / Q.list.length * 100}%"></i></div>
     <div class="pic" id="pic"></div><div class="meaning ar" id="mean"></div>
     <div class="word" id="word"></div><div class="fb" id="fb" aria-live="polite"></div><div class="bank" id="bank"></div>
-    <div class="row"><button id="say" class="b-orange">🔊 Listen</button><button id="hint" class="b-purple">💡 Hint</button><button id="chk">Check ✅</button></div>`;
+    <div class="row">${S.listen ? '<button id="say" class="b-orange">🔊 Listen</button>' : ""}${S.hint ? '<button id="hint" class="b-purple">💡 Hint</button>' : ""}<button id="chk">Check ✅</button></div>`;
   const pic = $("pic"); pic.classList.add("has");           // the picture box is always 200 x 150
   if(w.img){
     pic.textContent = "⏳";
@@ -340,8 +367,8 @@ function showQ(){
       b.onclick = () => put(ch); $("bank").appendChild(b);
     });
   }
-  $("say").onclick = () => speak(w.en);
-  $("hint").onclick = hint;
+  if($("say")) $("say").onclick = () => speak(w.en);
+  if($("hint")) $("hint").onclick = hint;
   $("chk").onclick = () => cur.done ? next() : check();
   if(cur.slots[0]) cur.slots[0].focus();
 }
@@ -502,17 +529,36 @@ $("en").onblur = autoFill;
 $("en").onkeydown = e => { if(e.key === "Enter"){ e.preventDefault(); $("addBtn").click(); } };   // Enter adds the word
 
 for(const id of ["ar","img"]) $(id).addEventListener("keydown", e => { if(e.key === "Enter"){ e.preventDefault(); $("addBtn").click(); } });
+let editIdx = null, picRemoved = false;
+function setEdit(i){                             // switch the form between "add" and "edit"
+  editIdx = i; picRemoved = false;
+  $("formTitle").textContent = i === null ? "✏️ Add a word" : "✏️ Edit word";
+  $("addBtn").textContent = i === null ? "Add word" : "💾 Save changes";
+  $("cancelEdit").hidden = i === null; $("rmPic").hidden = !(i !== null && words[i] && words[i].img);
+}
+function clearForm(){ $("en").value = $("ar").value = $("img").value = ""; $("file").value = ""; picData = ""; picJob = null; setPreview(null); autoAr = ""; }
+function startEdit(i){
+  const w = words[i]; clearForm(); setEdit(i);
+  $("en").value = w.en; $("ar").value = w.ar || "";
+  $("img").value = w.img && !/^data:/i.test(w.img) ? w.img : "";
+  if(w.img){ picData = w.img; startJob(() => fromLink(w.img), "❌ Could not load the saved picture. Add a new one, or remove it."); }
+  $("settings").scrollTo({top: 0, behavior: "smooth"}); $("en").focus();
+  setStatus("Change anything you like, then press “Save changes”.");
+}
+$("cancelEdit").onclick = () => { clearForm(); setEdit(null); setStatus("Edit cancelled."); };
+$("rmPic").onclick = () => { picData = ""; picRemoved = true; picJob = null; $("img").value = ""; $("file").value = ""; setPreview(null, "The picture will be removed when you save."); $("rmPic").hidden = true; };
+
 $("addBtn").onclick = async () => {
   const en = $("en").value.trim(); if(!en){ toast("Please type the English word."); return; }
   let ar = $("ar").value.trim();
   if(picJob) await picJob;                       // wait until the picture has finished loading
   const typed = cleanLink($("img").value), img = picData || (isPicSrc(typed) ? typed : "");
   if(!ar){ setStatus("Translating…"); ar = await translate(en); }       // empty Arabic = automatic translation
-  const i = words.findIndex(w => w.en.toLowerCase() === en.toLowerCase()), rec = {en, ar: ar || (i>=0 ? words[i].ar : ""), img: img || (i>=0 ? words[i].img || "" : ""), on: i>=0 ? words[i].on !== false : true};
+  const wasEdit = editIdx !== null, i = wasEdit ? editIdx : words.findIndex(w => w.en.toLowerCase() === en.toLowerCase()), rec = {en, ar: ar || (i>=0 ? words[i].ar : ""), img: img || (i>=0 && !picRemoved ? words[i].img || "" : ""), on: i>=0 ? words[i].on !== false : true};
   if(i >= 0) words[i] = rec; else words.push(rec);
-  saveWords(); renderList();
+  saveWords(); renderList(); setEdit(null);
   $("en").value = $("ar").value = $("img").value = ""; $("file").value = ""; picData = ""; picJob = null; setPreview(null); autoAr = ""; $("en").focus();
-  setStatus(!ar ? "Added, but translation failed. " + trWhy + "Type the Arabic yourself, or press “Translate missing” later." : "Added: " + en + " = " + rec.ar + (rec.img ? " 🖼️ ✔" : " ✔ (no picture yet: paste a link or add a photo)"));
+  setStatus(!ar ? "Added, but translation failed. " + trWhy + "Type the Arabic yourself, or press “Translate missing” later." : (wasEdit ? "Saved: " : "Added: ") + en + " = " + rec.ar + (rec.img ? " 🖼️ ✔" : " ✔ (no picture yet: paste a link or add a photo)"));
   Q = null;
 };
 
@@ -521,14 +567,15 @@ function renderList(){
   const ul = $("list"); ul.innerHTML = "";
   words.forEach((w,i) => {
     const li = document.createElement("li");
-    li.innerHTML = `<input type="checkbox" class="sel" aria-label="Include in quiz"><span class="e"></span><div class="t"><b></b><span class="ar"></span></div><button class="b-blue spk" aria-label="Listen">🔊</button><button class="b-red del" aria-label="Delete">✕</button>`;
+    li.innerHTML = `<input type="checkbox" class="sel" aria-label="Include in quiz"><span class="e"></span><div class="t"><b></b><span class="ar"></span></div><button class="b-orange edt" aria-label="Edit">✏️</button><button class="b-blue spk" aria-label="Listen">🔊</button><button class="b-red del" aria-label="Delete">✕</button>`;
     if(w.img){ const im = new Image(); im.referrerPolicy = "no-referrer"; im.src = w.img; im.alt = ""; li.querySelector(".e").appendChild(im); }
     const cb = li.querySelector(".sel"); cb.checked = w.on !== false;
     cb.onchange = () => { w.on = cb.checked; saveWords(); $("count2").textContent = "(" + active().length + " of " + words.length + " ticked)"; Q = null; };
     li.querySelector("b").textContent = w.en;
     li.querySelector(".ar").textContent = w.ar || "(no Arabic yet)";
+    li.querySelector(".edt").onclick = () => startEdit(i);
     li.querySelector(".spk").onclick = () => speak(w.en);
-    li.querySelector(".del").onclick = () => { words.splice(i,1); saveWords(); renderList(); Q = null; };
+    li.querySelector(".del").onclick = () => { words.splice(i,1); saveWords(); renderList(); Q = null; if(editIdx !== null){ clearForm(); setEdit(null); } };
     ul.appendChild(li);
   });
 }
@@ -539,6 +586,12 @@ $("fixBtn").onclick = async () => {
   if(!todo.length){ toast("Every word already has an Arabic meaning ✔"); return; }
   for(const w of todo){ if(!w.ar) w.ar = await translate(w.en); }
   saveWords(); renderList(); toast(words.some(w => !w.ar) ? "Could not translate some words. " + trWhy : "Done ✔");
+};
+let resetTimer;
+$("resetBtn").onclick = () => {
+  const b = $("resetBtn");
+  if(b.dataset.sure){ clearTimeout(resetTimer); delete b.dataset.sure; b.textContent = "↺ Default words"; words = SEED.map(w => ({...w})); saveWords(); clearForm(); setEdit(null); renderList(); Q = null; toast("Default words restored."); }
+  else { b.dataset.sure = "1"; b.textContent = "Tap again to restore"; resetTimer = setTimeout(() => { delete b.dataset.sure; b.textContent = "↺ Default words"; }, 4000); }
 };
 let clearTimer;
 $("clearBtn").onclick = () => {                  // two taps, because pop-up questions are blocked in some viewers
@@ -554,6 +607,12 @@ $("fit").onchange = () => { S.fit = $("fit").value; document.documentElement.sty
 $("choices").value = S.choices;
 $("choices").onchange = () => { S.choices = $("choices").value; saveSet(); };
 $("mode").value = S.mode; $("count").value = S.count; $("showAr").checked = S.showAr; $("autoSay").checked = S.autoSay;
+$("tListen").checked = S.listen; $("tHint").checked = S.hint; $("rate").value = S.rate; $("wcolor").value = S.wcolor;
+document.documentElement.style.setProperty("--word", S.wcolor);
+$("tListen").onchange = () => { S.listen = $("tListen").checked; saveSet(); };
+$("tHint").onchange = () => { S.hint = $("tHint").checked; saveSet(); };
+$("rate").onchange = () => { S.rate = $("rate").value; saveSet(); speak("elephant"); };           // plays a sample
+$("wcolor").oninput = () => { S.wcolor = $("wcolor").value; document.documentElement.style.setProperty("--word", S.wcolor); saveSet(); };
 $("mode").onchange = () => { S.mode = $("mode").value; saveSet(); };
 $("count").onchange = () => { S.count = $("count").value; saveSet(); };
 $("showAr").onchange = () => { S.showAr = $("showAr").checked; saveSet(); };
